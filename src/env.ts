@@ -1,8 +1,8 @@
-import z from "zod";
+import z from 'zod'
 
 export const env = z
   .object({
     PORT: z.coerce.number().default(3333),
-    DATABASE_URL: z.string().url().startsWith("postgres://"),
+    DATABASE_URL: z.string().url().startsWith('postgresql://'),
   })
-  .parse(process.env);
+  .parse(process.env)
