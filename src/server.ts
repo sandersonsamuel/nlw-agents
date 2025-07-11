@@ -10,6 +10,7 @@ import { env } from "./env.ts";
 import fastifySwagger from "@fastify/swagger";
 import { roomsRoutes } from "./http/routes/rooms.ts";
 import fastifySwaggerUi from "@fastify/swagger-ui";
+import { questionsRoute } from "./http/routes/questions.ts";
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -37,6 +38,10 @@ app.register(fastifySwaggerUi, {
 
 app.register(roomsRoutes, {
 	prefix: "/rooms",
+});
+
+app.register(questionsRoute, {
+	prefix: "/questions",
 });
 
 app.get("/health", () => {

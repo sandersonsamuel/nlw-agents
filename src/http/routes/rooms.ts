@@ -1,9 +1,9 @@
-import { eq } from "drizzle-orm";
-import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { validate as validateUUID, version as uuidVersion } from "uuid";
-import { z } from "zod/v4";
-import { db } from "../../db/connection.ts";
 import { schema } from "../../db/schemas/index.ts";
+import { validate as validateUUID, version as uuidVersion } from "uuid";
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import { db } from "../../db/connection.ts";
+import { count, eq } from "drizzle-orm";
+import { z } from "zod/v4";
 
 export const roomsRoutes: FastifyPluginAsyncZod = async (app) => {
 	app.get(
@@ -17,6 +17,8 @@ export const roomsRoutes: FastifyPluginAsyncZod = async (app) => {
 						z.object({
 							id: z.string(),
 							name: z.string(),
+							questionsCount: z.number(),
+							createdAt: z.date(),
 						}),
 					),
 				},
@@ -27,9 +29,16 @@ export const roomsRoutes: FastifyPluginAsyncZod = async (app) => {
 				.select({
 					id: schema.rooms.id,
 					name: schema.rooms.name,
+					questionsCount: count(schema.questions.id),
+					createdAt: schema.rooms.createdAt,
 				})
 				.from(schema.rooms)
-				.orderBy(schema.rooms.name);
+				.leftJoin(
+					schema.questions,
+					eq(schema.questions.roomId, schema.rooms.id),
+				)
+				.groupBy(schema.rooms.id, schema.rooms.name)
+				.orderBy(schema.rooms.createdAt);
 		},
 	);
 
